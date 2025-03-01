@@ -1,0 +1,100 @@
+                                                         Table "sale_order"
+            Column            |            Type             | Collation | Nullable |                Default
+------------------------------+-----------------------------+-----------+----------+----------------------------------------
+ id                           | integer                     |           | not null | nextval('sale_order_id_seq'::regclass)
+ campaign_id                  | integer                     |           |          |
+ source_id                    | integer                     |           |          |
+ medium_id                    | integer                     |           |          |
+ company_id                   | integer                     |           | not null |
+ partner_id                   | integer                     |           | not null |
+ journal_id                   | integer                     |           |          |
+ partner_invoice_id           | integer                     |           | not null |
+ partner_shipping_id          | integer                     |           | not null |
+ fiscal_position_id           | integer                     |           |          |
+ payment_term_id              | integer                     |           |          |
+ pricelist_id                 | integer                     |           |          |
+ currency_id                  | integer                     |           |          |
+ user_id                      | integer                     |           |          |
+ team_id                      | integer                     |           |          |
+ create_uid                   | integer                     |           |          |
+ write_uid                    | integer                     |           |          |
+ access_token                 | character varying           |           |          |
+ name                         | character varying           |           | not null |
+ state                        | character varying           |           |          |
+ client_order_ref             | character varying           |           |          |
+ origin                       | character varying           |           |          |
+ reference                    | character varying           |           |          |
+ signed_by                    | character varying           |           |          |
+ invoice_status               | character varying           |           |          |
+ validity_date                | date                        |           |          |
+ note                         | text                        |           |          |
+ currency_rate                | numeric                     |           |          |
+ amount_untaxed               | numeric                     |           |          |
+ amount_tax                   | numeric                     |           |          |
+ amount_total                 | numeric                     |           |          |
+ locked                       | boolean                     |           |          |
+ require_signature            | boolean                     |           |          |
+ require_payment              | boolean                     |           |          |
+ create_date                  | timestamp without time zone |           |          |
+ commitment_date              | timestamp without time zone |           |          |
+ date_order                   | timestamp without time zone |           | not null |
+ signed_on                    | timestamp without time zone |           |          |
+ write_date                   | timestamp without time zone |           |          |
+ prepayment_percent           | double precision            |           |          |
+ pending_email_template_id    | integer                     |           |          |
+ sale_order_template_id       | integer                     |           |          |
+ customizable_pdf_form_fields | jsonb                       |           |          |
+Indexes:
+    "sale_order_pkey" PRIMARY KEY, btree (id)
+    "sale_order__campaign_id_index" btree (campaign_id) WHERE campaign_id IS NOT NULL
+    "sale_order__company_id_index" btree (company_id)
+    "sale_order__create_date_index" btree (create_date)
+    "sale_order__medium_id_index" btree (medium_id) WHERE medium_id IS NOT NULL
+    "sale_order__name_index" gin (unaccent(name::text) gin_trgm_ops)
+    "sale_order__partner_id_index" btree (partner_id)
+    "sale_order__partner_invoice_id_index" btree (partner_invoice_id) WHERE partner_invoice_id IS NOT NULL
+    "sale_order__partner_shipping_id_index" btree (partner_shipping_id) WHERE partner_shipping_id IS NOT NULL
+    "sale_order__source_id_index" btree (source_id) WHERE source_id IS NOT NULL
+    "sale_order__state_index" btree (state)
+    "sale_order__user_id_index" btree (user_id)
+    "sale_order_date_order_id_idx" btree (date_order DESC, id DESC)
+Check constraints:
+    "sale_order_date_order_conditional_required" CHECK (state::text = 'sale'::text AND date_order IS NOT NULL OR state::text <> 'sale'::t
+ext)
+Foreign-key constraints:
+    "sale_order_campaign_id_fkey" FOREIGN KEY (campaign_id) REFERENCES utm_campaign(id) ON DELETE SET NULL
+    "sale_order_company_id_fkey" FOREIGN KEY (company_id) REFERENCES res_company(id) ON DELETE RESTRICT
+    "sale_order_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    "sale_order_currency_id_fkey" FOREIGN KEY (currency_id) REFERENCES res_currency(id) ON DELETE RESTRICT
+    "sale_order_fiscal_position_id_fkey" FOREIGN KEY (fiscal_position_id) REFERENCES account_fiscal_position(id) ON DELETE SET NULL
+    "sale_order_journal_id_fkey" FOREIGN KEY (journal_id) REFERENCES account_journal(id) ON DELETE SET NULL
+    "sale_order_medium_id_fkey" FOREIGN KEY (medium_id) REFERENCES utm_medium(id) ON DELETE SET NULL
+    "sale_order_partner_id_fkey" FOREIGN KEY (partner_id) REFERENCES res_partner(id) ON DELETE RESTRICT
+    "sale_order_partner_invoice_id_fkey" FOREIGN KEY (partner_invoice_id) REFERENCES res_partner(id) ON DELETE RESTRICT
+    "sale_order_partner_shipping_id_fkey" FOREIGN KEY (partner_shipping_id) REFERENCES res_partner(id) ON DELETE RESTRICT
+    "sale_order_payment_term_id_fkey" FOREIGN KEY (payment_term_id) REFERENCES account_payment_term(id) ON DELETE SET NULL
+    "sale_order_pending_email_template_id_fkey" FOREIGN KEY (pending_email_template_id) REFERENCES mail_template(id) ON DELETE SET NULL
+    "sale_order_pricelist_id_fkey" FOREIGN KEY (pricelist_id) REFERENCES product_pricelist(id) ON DELETE SET NULL
+    "sale_order_sale_order_template_id_fkey" FOREIGN KEY (sale_order_template_id) REFERENCES sale_order_template(id) ON DELETE SET NULL
+    "sale_order_source_id_fkey" FOREIGN KEY (source_id) REFERENCES utm_source(id) ON DELETE SET NULL
+    "sale_order_team_id_fkey" FOREIGN KEY (team_id) REFERENCES crm_team(id) ON DELETE SET NULL
+    "sale_order_user_id_fkey" FOREIGN KEY (user_id) REFERENCES res_users(id) ON DELETE SET NULL
+    "sale_order_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+Referenced by:
+    TABLE "quotation_document_sale_order_rel" CONSTRAINT "quotation_document_sale_order_rel_sale_order_id_fkey" FOREIGN KEY (sale_order_i
+d) REFERENCES sale_order(id) ON DELETE CASCADE
+    TABLE "sale_advance_payment_inv_sale_order_rel" CONSTRAINT "sale_advance_payment_inv_sale_order_rel_sale_order_id_fkey" FOREIGN KEY (
+sale_order_id) REFERENCES sale_order(id) ON DELETE CASCADE
+    TABLE "sale_order_cancel" CONSTRAINT "sale_order_cancel_order_id_fkey" FOREIGN KEY (order_id) REFERENCES sale_order(id) ON DELETE CAS
+CADE
+    TABLE "sale_order_discount" CONSTRAINT "sale_order_discount_sale_order_id_fkey" FOREIGN KEY (sale_order_id) REFERENCES sale_order(id)
+ ON DELETE CASCADE
+    TABLE "sale_order_line" CONSTRAINT "sale_order_line_order_id_fkey" FOREIGN KEY (order_id) REFERENCES sale_order(id) ON DELETE CASCADE
+    TABLE "sale_order_mass_cancel_wizard_rel" CONSTRAINT "sale_order_mass_cancel_wizard_rel_sale_order_id_fkey" FOREIGN KEY (sale_order_i
+d) REFERENCES sale_order(id) ON DELETE CASCADE
+    TABLE "sale_order_option" CONSTRAINT "sale_order_option_order_id_fkey" FOREIGN KEY (order_id) REFERENCES sale_order(id) ON DELETE CAS
+CADE
+    TABLE "sale_order_tag_rel" CONSTRAINT "sale_order_tag_rel_order_id_fkey" FOREIGN KEY (order_id) REFERENCES sale_order(id) ON DELETE C
+ASCADE
+    TABLE "sale_order_transaction_rel" CONSTRAINT "sale_order_transaction_rel_sale_order_id_fkey" FOREIGN KEY (sale_order_id) REFERENCES
+sale_order(id) ON DELETE CASCADE
